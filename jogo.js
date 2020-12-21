@@ -16,18 +16,18 @@ const flappyBird = {
     drawWidth: 33,
     drawHeight: 24,
     gravity: 0.25,
-    speed:0,
+    speed: 0,
     update() {
-        flappyBird.speed = flappyBird.speed + flappyBird.gravity
-        flappyBird.drawY = flappyBird.drawY + flappyBird.speed;
+        this.speed = this.speed + this.gravity
+        this.drawY = this.drawY + this.speed;
     },
     draw() {
         contexto.drawImage(
             sprites,
-            flappyBird.sourceX, flappyBird.sourceY,
-            flappyBird.sourceWidth, flappyBird.sourceHeight,
-            flappyBird.drawX, flappyBird.drawY,
-            flappyBird.drawWidth, flappyBird.drawHeight
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            this.drawX, this.drawY,
+            this.drawWidth, this.drawHeight
         )
     }
 }
@@ -44,18 +44,18 @@ const floor = {
     draw() {
         contexto.drawImage(
             sprites,
-            floor.sourceX, floor.sourceY,
-            floor.sourceWidth, floor.sourceHeight,
-            floor.drawX, floor.drawY,
-            floor.drawWidth, floor.drawHeight
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            this.drawX, this.drawY,
+            this.drawWidth, this.drawHeight
         )
 
         contexto.drawImage(
             sprites,
-            floor.sourceX, floor.sourceY,
-            floor.sourceWidth, floor.sourceHeight,
-            floor.drawX + floor.drawWidth, floor.drawY,
-            floor.drawWidth, floor.drawHeight
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            this.drawX + this.drawWidth, this.drawY,
+            this.drawWidth, this.drawHeight
         )
     }
 }
@@ -71,34 +71,95 @@ const bgGamer = {
     drawHeight: 204,
     draw() {
         contexto.fillStyle = '#70c5ce';
-        contexto.fillRect(0,0, canvas.width, canvas.height);
-        
+        contexto.fillRect(0, 0, canvas.width, canvas.height);
+
         contexto.drawImage(
             sprites,
-            bgGamer.sourceX, bgGamer.sourceY,
-            bgGamer.sourceWidth, bgGamer.sourceHeight,
-            bgGamer.drawX, bgGamer.drawY,
-            bgGamer.drawWidth, bgGamer.drawHeight
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            this.drawX, this.drawY,
+            this.drawWidth, this.drawHeight
         )
 
         contexto.drawImage(
             sprites,
-            bgGamer.sourceX, bgGamer.sourceY,
-            bgGamer.sourceWidth, bgGamer.sourceHeight,
-            (bgGamer.drawX + bgGamer.drawWidth), bgGamer.drawY,
-            bgGamer.drawWidth, bgGamer.drawHeight
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            (this.drawX + this.drawWidth), this.drawY,
+            this.drawWidth, this.drawHeight
         )
     }
 }
 
-function loop() {
-    flappyBird.update();
+// Mensagem Get Ready
+const mensagemGetReady = {
+    sourceX: 134,
+    sourceY: 0,
+    sourceWidth: 174,
+    sourceHeight: 152,
+    drawX: (canvas.width / 2) - (174 / 2),
+    drawY: 90,
+    drawWidth: 174,
+    drawHeight: 152,
+    draw() {
+        contexto.drawImage(
+            sprites,
+            this.sourceX, this.sourceY,
+            this.sourceWidth, this.sourceHeight,
+            this.drawX, this.drawY,
+            this.drawWidth, this.drawHeight
+        )
+    }
+}
 
-    bgGamer.draw();
-    floor.draw();
-    flappyBird.draw();
-    
+//
+// Telas
+//
+
+const screens = {
+    ative: {},
+    HOME: {
+        draw() {
+            screens.GAME.draw()
+            mensagemGetReady.draw()
+        },
+        update() {
+
+        },
+        click() {
+            screens.screenRoute(screens.GAME);
+        }
+    },
+    GAME: {
+        draw() {
+            bgGamer.draw();
+            floor.draw();
+            flappyBird.draw();
+        },
+        update() {
+            flappyBird.update();
+        },
+        click() {
+            false;
+        }
+    },
+    screenRoute(screen) {
+        this.ative = screen
+    }
+}
+
+
+function loop() {
+    screens.ative.draw();
+    screens.ative.update();
     requestAnimationFrame(loop);
 }
 
-loop();
+(function(){
+    window.addEventListener('click', () => {
+        screens.ative.click() ?? screens.ative.click() 
+    });
+
+    screens.screenRoute(screens.HOME);
+    loop();
+})()
