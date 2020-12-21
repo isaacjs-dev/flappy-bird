@@ -1,12 +1,17 @@
-console.log('http://127.0.0.1:5500/index.html');
-
 const sprites = new Image();
 sprites.src = './sprites.png'
 
 const canvas = document.querySelector('canvas');
 const contexto = canvas.getContext('2d')
 
-const flappyBird = {
+const soundHIT = new Audio();
+soundHIT.src = './sound/hit.wav';
+
+const globals = {
+
+}
+
+const flappyBird = () => ({
     sourceX: 0,
     sourceY: 0,
     sourceWidth: 33,
@@ -17,7 +22,18 @@ const flappyBird = {
     drawHeight: 24,
     gravity: 0.25,
     speed: 0,
+    skip: 4.6,
+    jump() {
+        this.speed = - this.skip;
+    },
     update() {
+        if (collided(globals.flappyBird, floor)) {
+            soundHIT.play()
+            setTimeout(() => {
+                screens.screenRoute(screens.HOME);
+            }, 500)
+            return;
+        }
         this.speed = this.speed + this.gravity
         this.drawY = this.drawY + this.speed;
     },
@@ -30,7 +46,7 @@ const flappyBird = {
             this.drawWidth, this.drawHeight
         )
     }
-}
+})
 
 const floor = {
     sourceX: 0,
@@ -119,6 +135,9 @@ const mensagemGetReady = {
 const screens = {
     ative: {},
     HOME: {
+        init() {
+            globals.flappyBird = flappyBird();
+        },
         draw() {
             screens.GAME.draw()
             mensagemGetReady.draw()
@@ -134,20 +153,23 @@ const screens = {
         draw() {
             bgGamer.draw();
             floor.draw();
-            flappyBird.draw();
+            globals.flappyBird.draw();
         },
         update() {
-            flappyBird.update();
+            globals.flappyBird.update();
         },
         click() {
-            false;
+            globals.flappyBird.jump();
         }
     },
     screenRoute(screen) {
         this.ative = screen
+        if (screen.init) screen.init();
+
     }
 }
 
+const collided = (flappyBird, gameFloor) => flappyBird.drawY + flappyBird.sourceHeight >= gameFloor.drawY
 
 function loop() {
     screens.ative.draw();
@@ -155,11 +177,12 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-(function(){
+(function () {
     window.addEventListener('click', () => {
-        screens.ative.click() ?? screens.ative.click() 
+        if (screens.ative.click) screens.ative.click()
     });
 
     screens.screenRoute(screens.HOME);
+
     loop();
 })()
